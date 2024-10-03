@@ -7570,7 +7570,7 @@ a.anchor-link {
 <li>Convolution Operation</li>
 </ul>
 <blockquote>
-<p>The core concept behind Convolutional Neural Network comes from the convolution operation, which plays a fundamental role in data processing tasks like image recognition.</p>
+<p>The core concept behind CNN(Convolutional Neural Network) comes from the convolution operation, which plays a fundamental role in data processing tasks like image recognition.</p>
 </blockquote>
 <p>The main purpose of convolution is to extract features and isolate important details from the input image；
 By sliding filters (small matrixes) over the input matrix of pixel value, the neural network can better understand and classify features within the images；
@@ -7631,7 +7631,7 @@ During the convolution operation, these filters also preserve the spatial relati
 <p>Each single image is actually a matrix composed of pixel values: </p>
 <p><img alt="每个图像都是一个像素值组成的矩阵" src="http://arthurchiao.art/assets/img/cnn-intuitive-explanation/8-gif.webp"/></p>
 <p>In image processing, a channel refers to a specific part of the image data. For example,</p>
-<pre><code>-Digital cameras capture images using the RGB color model, which consists of three channels: Red, Green, and Blue. You can visualize different color components as three stacked 2D matrices, each representing different intensities of color. In this representation, each pixel value ranges from 0 to 255.
+<pre><code>- Digital cameras capture images using the RGB color model, which consists of three channels: Red, Green, and Blue. You can visualize different color components as three stacked 2D matrices, each representing different intensities of color. In this representation, each pixel value ranges from 0 to 255.
 
 - A grayscale image has only a single channel.</code></pre>
 <p>For simplicity, this research will only consider grayscale images. This means we will have a 2D matrix to express the grayscale image, where pixel values range from 0 to 255 with 0 represents pure black, and 255 represents pure white.</p>
@@ -7785,7 +7785,7 @@ During the convolution operation, these filters also preserve the spatial relati
 </li>
 <li><p>Layer Parameters remain consistent.</p>
 </li>
-<li><p>In a Cyphertext CNN, the calculations for non-parametric layers (i.e. activation functions) must be replaced with the corresponding functions from the fhetorch library, to ensure that they can work with encrypted data while maintaining the intended behavior of the original operations.</p>
+<li><p>In a Ciphertext CNN, the calculations for non-parametric layers (i.e. activation functions) must be replaced with the corresponding functions from the fhetorch library, to ensure that they can work with encrypted data while maintaining the intended behavior of the original operations.</p>
 </li>
 </ul>
 </div>
@@ -7884,8 +7884,8 @@ During the convolution operation, these filters also preserve the spatial relati
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="5.-%E6%98%8E%E6%96%87%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96">Plaintext Model Initialization<a class="anchor-link" href="#5.-%E6%98%8E%E6%96%87%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96">¶</a></h3><ul>
-<li><p><code>mnist.pt</code> refers to the saved parameters of a previously trained model. After loading it using load_state_dict, the model is set to evaluation mode using eval, resulting in the plaintext model</p>
+<h3 id="5.-%E6%98%8E%E6%96%87%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96">5. Plaintext Model Initialization<a class="anchor-link" href="#5.-%E6%98%8E%E6%96%87%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96">¶</a></h3><ul>
+<li><p><code>mnist.pt</code> refers to the saved parameters of a previously trained model. After loading it using load_state_dict, the model is set to evaluation mode using eval, resulting in the plaintext model.</p>
 </li>
 <li><p>After loading the model parameters, the structure of the plaintext model is printed out as follows. It’s noted that the time cost is mainly in the <code>conv2d</code> operations </p>
 </li>
