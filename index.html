@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>3.torch密态手写体识别</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>3.torch Encrypted Handwriting Recognition</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7534,8 +7534,8 @@ a.anchor-link {
 <span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
 <span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
 <span class="kn">from</span> <span class="nn">torchvision.utils</span> <span class="kn">import</span> <span class="n">save_image</span>
-<span class="kn">import</span> <span class="nn">hetorch</span>
-<span class="kn">from</span> <span class="nn">hetorch.op.CipherUtil</span> <span class="kn">import</span> <span class="n">encrypt_tensor</span><span class="p">,</span> <span class="n">decrypt_tensor</span>
+<span class="kn">import</span> <span class="nn">fhetorch</span>
+<span class="kn">from</span> <span class="nn">fhetorch.op.CipherUtil</span> <span class="kn">import</span> <span class="n">encrypt_tensor</span><span class="p">,</span> <span class="n">decrypt_tensor</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">fvcore.nn</span> <span class="kn">import</span> <span class="n">parameter_count_table</span>
@@ -7781,11 +7781,11 @@ During the convolution operation, these filters also preserve the spatial relati
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="3.-%E5%AF%86%E6%96%87-CNN-%E6%9E%B6%E6%9E%84">3. Ciphertext CNN Architecture<a class="anchor-link" href="#3.-%E5%AF%86%E6%96%87-CNN-%E6%9E%B6%E6%9E%84">¶</a></h3><ul>
-<li><p>Standard CNN layers are replaced with their counterparts from a library designed for homomorphic encryption or secure computations, such as hetorch. For example, <code>Conv2D</code> -&gt; <code>HeConv2D</code></p>
+<li><p>Standard CNN layers are replaced with their counterparts from a library designed for homomorphic encryption or secure computations, such as fhetorch. For example, <code>Conv2D</code> -&gt; <code>HeConv2D</code></p>
 </li>
 <li><p>Layer Parameters remain consistent.</p>
 </li>
-<li><p>•	In a Cyphertext CNN, the calculations for non-parametric layers (i.e. activation functions) must be replaced with the corresponding functions from the hetorch library, to ensure that they can work with encrypted data while maintaining the intended behavior of the original operations.</p>
+<li><p>In a Cyphertext CNN, the calculations for non-parametric layers (i.e. activation functions) must be replaced with the corresponding functions from the fhetorch library, to ensure that they can work with encrypted data while maintaining the intended behavior of the original operations.</p>
 </li>
 </ul>
 </div>
@@ -7802,22 +7802,22 @@ During the convolution operation, these filters also preserve the spatial relati
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CipherNet</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">CipherNet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hconv1</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">HeConv2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hconv2</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">HeConv2D</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hfc1</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">HeLinear</span><span class="p">(</span><span class="mi">2880</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hfc2</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">HeLinear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hconv1</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">HeConv2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hconv2</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">HeConv2D</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hfc1</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">HeLinear</span><span class="p">(</span><span class="mi">2880</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hfc2</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">HeLinear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
     
     <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hconv1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">hrelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">hrelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hconv2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">hrelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">hmaxpool_2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">hflatten</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">hrelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">hmaxpool_2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">hflatten</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hfc1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">hrelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">hrelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hfc2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="n">hetorch</span><span class="o">.</span><span class="n">hlog_softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">fhetorch</span><span class="o">.</span><span class="n">hlog_softmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">output</span>
 </pre></div>
 </div>
@@ -7954,7 +7954,7 @@ During the convolution operation, these filters also preserve the spatial relati
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="6.-%E5%AF%86%E6%96%87%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96">6. Ciphertext Model Initialization<a class="anchor-link" href="#6.-%E5%AF%86%E6%96%87%E6%A8%A1%E5%9E%8B%E5%88%9D%E5%A7%8B%E5%8C%96">¶</a></h3><p>Two methods:</p>
 <ul>
-<li><p>Real-time conversion: for each layer of plaintext parameter calls<code>encrypt_tensor</code>obtain the ciphertext parameters</p>
+<li><p>Real-time Conversion: For each layer, call<code>encrypt_tensor</code>to obtain the ciphertext parameters</p>
 </li>
 <li><p>Recovery from File: <code>cipher_mnist.pt</code> is the file that stores the pre-converted parameters for each layer. Load them directly using load.</p>
 </li>
@@ -7970,7 +7970,7 @@ During the convolution operation, these filters also preserve the spatial relati
 <div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">hetorch</span><span class="o">.</span><span class="n">initDict</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">fhetorch</span><span class="o">.</span><span class="n">initDict</span><span class="p">()</span>
 <span class="n">model_cipher</span> <span class="o">=</span> <span class="n">CipherNet</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s1">'cpu'</span><span class="p">)</span>
 
 <span class="n">param_dict</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">'./data/cipher_mnist.pt'</span><span class="p">)</span>
@@ -8011,7 +8011,7 @@ During the convolution operation, these filters also preserve the spatial relati
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>/liuchiyu/hetorch/hetorch/file/dictf3.3 /liuchiyu/hetorch/hetorch/file/user_info /liuchiyu/hetorch/hetorch/file/user_info_skb
+<pre>/liuchiyu/fhetorch/fhetorch/file/dictf3.3 /liuchiyu/fhetorch/fhetorch/file/user_info /liuchiyu/fhetorch/fhetorch/file/user_info_skb
 Hello,  chiyuliu
 Serial number verification succeeded! 80 days left to expiration.
 Info: init dict success.
@@ -8035,7 +8035,7 @@ fhetorch Parameter Quantity:
 |  hfc2           |  6.5K                |
 |   hfc2.weight   |   (10, 128, 5)       |
 |   hfc2.bias     |   (10, 5)            |
-hetorch统计:
+fhetorch统计:
 ==========================================================================================
 Layer (type:depth-idx)                   Output Shape              Param #
 ==========================================================================================
