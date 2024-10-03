@@ -7781,7 +7781,7 @@ During the convolution operation, these filters also preserve the spatial relati
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="3.-%E5%AF%86%E6%96%87-CNN-%E6%9E%B6%E6%9E%84">3. Ciphertext CNN Architecture<a class="anchor-link" href="#3.-%E5%AF%86%E6%96%87-CNN-%E6%9E%B6%E6%9E%84">¶</a></h3><ul>
-<li><p>Standard CNN layers are replaced with their counterparts from a library designed for homomorphic encryption or secure computations, such as fhetorch. For example, <code>Conv2D</code> -&gt; <code>HeConv2D.</code></p>
+<li><p>Standard CNN layers are replaced with their counterparts from a library designed for homomorphic encryption or secure computations, such as FHEtorch. For example, <code>Conv2D</code> -&gt; <code>HeConv2D.</code></p>
 </li>
 <li><p>Layer Parameters remain consistent.</p>
 </li>
@@ -7956,7 +7956,7 @@ During the convolution operation, these filters also preserve the spatial relati
 <ul>
 <li><p>Real-time Conversion: For each layer, call<code>encrypt_tensor</code>to obtain the ciphertext parameters.</p>
 </li>
-<li><p>Recovery from File: <code>cipher_mnist.pt</code> is the file that stores the pre-converted parameters for each layer. Load them directly using load.</p>
+<li><p>Recovery from File: <code>cipher_mnist.pt</code> is the file that stores the pre-converted parameters for each layer. Load them directly.</p>
 </li>
 </ul>
 </div>
